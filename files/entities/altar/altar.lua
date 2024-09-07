@@ -102,36 +102,42 @@ local altars = {
         tag = "Omni_Altar",
         omni = {
             {
+                tag = "Speed_Altar",
                 object = "gunaction_config", -- all the altars in one, kinda -- speed
                 property = "fire_rate_wait",
                 var_field = "value_int",
                 operator = "reductive"
             },
             {
+                tag = "Reload_Altar",
                 object = "gun_config", -- reload
                 property = "reload_time",
                 var_field = "value_int",
                 operator = "reductive"
             },
             {
+                tag = "Mana_Altar",
                 object = nil, -- mana
                 property = "mana_max",
                 var_field = "value_int",
                 operator = "additive"
             },
             {
+                tag = "Recharge_Altar",
                 object = nil, -- recharge
                 property = "mana_charge_speed",
                 var_field = "value_int",
                 operator = "additive"
             },
             {
+                tag = "Spread_Altar",
                 object = "gunaction_config", -- spread
                 property = "spread_degrees",
                 var_field = "value_int",
                 operator = "reductive"
             },
             {
+                tag = "Capacity_Altar",
                 object = "gun_config", -- capacity
                 property = "deck_capacity",
                 var_field = "value_int",
@@ -370,10 +376,12 @@ function adjust_value_for_growth(last, value, isOmni, altar)
     local growth = get_growth_value(last, value, isOmni, altar)
     local improvedValue = baseValue + growth
     if altar.tag == "Capacity_Altar" then
-        print("capacity altar base " + baseValue + " with growth " + growth)
+        -- print("capacity altar base " .. baseValue .. " with growth " .. growth)
         local capacityLimit = ModSettingGet("wand_workshop.capacity_max")
+        -- makes it so that the base value can exceed the 
+        -- cap if you are already past it, you just can't grow past it
         improvedValue = math.max(baseValue, math.min(baseValue + growth, capacityLimit))
-        print("capacity limited to " + capacityLimit + " so improved value clamped to " + improvedValue)
+        -- print("capacity limited to " .. capacityLimit .. " so improved value clamped to " .. improvedValue)
     end
     return improvedValue
 end
@@ -444,7 +452,7 @@ function get_growth_value(last, value, isOmni, altar)
             growth = math.floor(growth)
         end
     end
-    print("growth at " + growth)
+    print("growth at " .. growth)
     return growth
 end
 
