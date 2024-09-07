@@ -1,0 +1,10 @@
+<Entity
+  tags="Wand_Altar"
+  >
+  <Base file="mods/wand_workshop/files/entities/altar/base_altar.xml">
+    <ParticleEmitterComponent
+      image_animation_file="mods/wand_workshop/files/entities/altar/main_altar_runes.png"
+      emitted_material_name="spark_purple"
+      />
+  </Base>
+</Entity>
