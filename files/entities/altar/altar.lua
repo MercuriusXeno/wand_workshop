@@ -273,7 +273,7 @@ function reset_wands(altar_id)
             local component_id = EntityGetFirstComponentWithVariable(wand_id, "VariableStorageComponent", "name", altar.property, wand_stat_buffer_tag)
             if component_id ~= nil then
                 local value = ComponentGetValue2(component_id, altar.var_field)
-                print("reset wand " .. altar.property .. " to buffer value " .. value)
+                -- print("reset wand " .. altar.property .. " to buffer value " .. value)
                 if altar.object == nil then
                     ComponentSetValue2(ability_component_id, altar.property, value)
                 else
@@ -345,7 +345,7 @@ end
 
 function get_altar_property_of_component(component_id, altar)
     local value = nil
-    print("getting altar property of component " .. component_id .. " for altar property " .. altar.property)
+    --print("getting altar property of component " .. component_id .. " for altar property " .. altar.property)
     if altar.object ~= nil then
         value = ComponentObjectGetValue2(component_id, altar.object, altar.property)
     else
