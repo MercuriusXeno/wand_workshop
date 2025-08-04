@@ -1,21 +1,42 @@
-WandGrowth (Advanced) Add-on for WandWorkshop2.0 
-    (Absorb Stats + Omni Pillar)
+Workshop 3.0 - Other Stuff Edition
 
 CHANGES
 =======
-Adds "wand growth" feature to the wand workshop (2.0):
-  If the sacrifice wand for a stat pillar wouldn't improve the target wand by swapping stats, it has a % of its stats stolen instead.
-  The % is based on the mix ratio. If you set it above 100%, anything above 100% is the stolen amount (so 110% => 100% swap + 10% theft if already better)
-  If you set the mix ratio to 100 or less, growth is disabled for the stat pillars.
-Adds "omni" pillar feature:
-  Omni pillar works if the mix_ratio is above 100% or, alternatively, if you set the omni ratio to something other than 0%.
-  Omni will *only* absorb stats that can be grown. Whatever your absorb ratio is (mix_ratio - 100), Omni takes half.
-  In exchange, Omni works on all absorbable stats simultaneously (that's 6 pillars at once): speed, reload, mana, charge, slots and spread.
+3.0 IS NOT COMPATIBLE WITH SAVES USING 2.5 OR EARLIER.
+DO NOT USE BOTH MODS AT ONCE.
+
+FEATURES
+========
+
+* Wand merging, simplified:
+1. Put the wand you want to keep on the floating altar.
+2. Put wands you're sacrificing on the big altar below it. 
+3. Pick up the wand you want to keep, now enhanced.
+
+FLASK MERGING
+=============
+Place a flask on the altar and then offer the rest of the recipe.
+
+Any Flask <- Any Empty Flask = Kept Flask with combined capacity
+Any Flask <- 1000 Ambrosia Flask = Kept Flask with "Tempered", becoming unbreakable.
+Any Flask <- 1000 Oil Flask = Kept Flask with "Inert", decreases reactivity within.
+Any Flask <- 1000 Toxic Sludge = Kept Flask with "Reactive", increases reactivity within. (Cancels out inert)
+Any Flask <- 1000 Teleportatium Flask = Kept Flask with "Remote", the mouth of the flask is also the mouse cursor.
+
+(I may expand upon this list, if I get the urge. This felt like a good place to stop and test.)
+
+WAND MERGING
+============
+1. Spread, cast delay and reload are set to the lowest among all wands.
+2. Capacity is set to the highest among all wands.  
+3. Shuffle and spells cast are left alone. The kept wand determines these.
+4. Mana regen and capacity use an iterative formula:
+  Sort list, take worst (w) and next worst (n) wand stat (including formula results)
+  result = n + (w/n)^0.5 * w (REPEAT UNTIL LIST EMPTY)
 
 CREDITS
 =======
-I stole this credit blurb from Gladious, creator of the 2.0 version of the mod, which saw Spread and Capacity altars (huge, huge thanks for these).
-    All credits to Megacrafter127 the creator of the original mod. Modified version of the Wand Workshop mod. 
-    This modified version adds 2 missing altars, the spread altar and the capacity altar. 
-    Original mod: https://steamcommunity.com/sharedfiles/filedetails/?id=1994857511
-And so, additional credit to Gladious, for creating the 2.0 version I based my modified version (2.5?) on.
+I didn't come up with the workshop concept originally. You can find the original versions still:
+1.0 by Megacrafter127
+2.0 by Gladious
+2.5 is by me, but don't use it. It's a mess.

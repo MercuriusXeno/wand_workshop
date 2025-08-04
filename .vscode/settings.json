@@ -1,0 +1,14 @@
+{
+    "Lua.diagnostics.globals": [
+        "collision_trigger",
+        "item_pickup",
+        "mod_setting_get_id",
+        "mod_setting_bool_custom",
+        "mod_setting_change_callback",
+        "mod_settings_version",
+        "mod_settings"
+    ],
+    "Lua.diagnostics.disable": [
+        "missing-parameter"
+    ]
+}

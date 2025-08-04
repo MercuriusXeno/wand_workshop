@@ -1,28 +1,13 @@
 <Entity
-  tags="wand_workshop_altar"
+  tags="workshop_altar"
   >
-
-  <CollisionTriggerComponent
-    width="23"
-    height="1"
-    required_tag="wand"
-    _tags="wand_pickup"
-    destroy_this_entity_when_triggered="0"
-    >
-  </CollisionTriggerComponent>
-
-  <LuaComponent
-    script_collision_trigger_hit="mods/wand_workshop/files/entities/altar/base_altar_trigger.lua"
-    execute_every_n_frame="-1"
-    >
-  </LuaComponent>
   
   <ParticleEmitterComponent 
     _enabled="0"
-    _tags="wand_effect"
+    _tags="item_effect"
     gravity.y="0.0"
-    y_pos_offset_min="7"
-    y_pos_offset_max="7"
+    y_pos_offset_min="8"
+    y_pos_offset_max="8"
     x_pos_offset_min="1"
     x_pos_offset_max="1"
     lifetime_min="0.5"
@@ -45,4 +30,9 @@
     >
 	</ParticleEmitterComponent>
 
+  <LuaComponent
+    script_collision_trigger_hit="mods/wand_workshop/files/scripts/altar_collision.lua"
+    execute_every_n_frame="-1"
+    >
+  </LuaComponent>
 </Entity>

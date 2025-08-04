@@ -32,62 +32,9 @@ function mod_setting_change_callback( mod_id, gui, in_main_menu, setting, old_va
 end
 
 local mod_id = "wand_workshop" -- This should match the name of your mod's folder.
-mod_settings_version = 1 -- This is a magic global that can be used to migrate settings to new mod versions. call mod_settings_get_version() before mod_settings_update() to get the old value.
+mod_settings_version = 3 -- This is a magic global that can be used to migrate settings to new mod versions. call mod_settings_get_version() before mod_settings_update() to get the old value.
 mod_settings =
 {
-	{
-		id = "mix_fraction",
-		ui_name = "Mix Ratio",
-		ui_description =
-            "The percentage of stats the sacrificed wand should give the target." ..
-            "\nIf target > sacrificed wand, (ratio - 100)% is added instead" ..
-            "\nOmni pillar (rune omega) receives half of this %" ..
-            "\nbut improves all 6 growth stats (shuffle/simulcast ignored!)." ..
-            "\n0%: Single-stat pillars do nothing. The old stat is always kept." ..
-            "\n50%: The stat becomes the average of both. Absorb OFF." ..
-            "\n100%: If target < sacrifice, swap stats. Absorb OFF." ..
-            "\n150%: If sacrifice < target, absorb 50% (Omni 25%)." ..
-            "\n200%: If sacrifice < target, absorb 100% (Omni 50%)." ..
-            "\nRecommended is 110 or 120, or go wild, who cares.",
-		value_default = 1.1,
-		value_min = 0,
-		value_max = 2,
-		value_display_multiplier = 100,
-		value_display_formatting = " $0 %",
-		scope = MOD_SETTING_SCOPE_NEW_GAME,
-		change_fn = mod_setting_change_callback, -- Called when the user interact with the settings widget.
-	},
-	{
-		id = "omni_override",
-		ui_name = "Omni Ratio",
-		ui_description =
-            "Omni pillar (rune omega) absorbs (mix - 100), cut in half." ..
-            "\nIf desired, this setting overrides that, up to 100%." ..
-            "\n0%: Use the default (doesn't disable omni pillar)." ..
-            "\n50%: Omni absorbs 50% (speed/reload/spread/mana/charge/slots)." ..
-            "\n100%: Omni absorbs 100% (speed/reload/spread/mana/charge/slots)." ..
-            "\nIf Mix Ratio is at or below 100, you can still" ..
-            "\ngrow wands using the Omni pillar, if you set this > 0%.",
-		value_default = 0,
-		value_min = 0,
-		value_max = 1,
-		value_display_multiplier = 100,
-		value_display_formatting = " $0 %",
-		scope = MOD_SETTING_SCOPE_NEW_GAME,
-		change_fn = mod_setting_change_callback, -- Called when the user interact with the settings widget.
-	},
-	{
-		id = "capacity_max",
-		ui_name = "Capacity Maximum",
-		ui_description = "Wand slots can go off screen if they get too high.",
-		value_default = 26,
-		value_min = 0,
-		value_max = 30,
-		value_display_multiplier = 1,
-		value_display_formatting = " $0",
-		scope = MOD_SETTING_SCOPE_NEW_GAME,
-		change_fn = mod_setting_change_callback, -- Called when the user interact with the settings widget.
-	}
 }
 
 -- This function is called to ensure the correct setting values are visible to the game via ModSettingGet(). your mod's settings don't work if you don't have a function like this defined in settings.lua.

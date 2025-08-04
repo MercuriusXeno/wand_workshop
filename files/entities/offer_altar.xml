@@ -1,0 +1,18 @@
+<Entity
+  tags="offer_altar"
+  >
+  <Base file="mods/wand_workshop/files/entities/base_altar.xml">
+    <ParticleEmitterComponent
+      image_animation_file="mods/wand_workshop/files/entities/offer_altar_runes.png"
+      emitted_material_name="spark_purple"
+      />
+  </Base>
+
+  <CollisionTriggerComponent
+    width="135"
+    height="1"
+    _tags="offer_grab"
+    destroy_this_entity_when_triggered="0"
+    >
+  </CollisionTriggerComponent>
+</Entity>
