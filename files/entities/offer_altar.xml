@@ -8,19 +8,11 @@
   </Base>
 
   <CollisionTriggerComponent
-    width="300"
-    height="10"
-    required_tag="wand"
-    _tags="offer_wand"
-    destroy_this_entity_when_triggered="0"
-    >
-  </CollisionTriggerComponent>
-
-  <CollisionTriggerComponent
-    width="300"
-    height="10"
-    required_tag="potion"
-    _tags="offer_flask"
+    width="137"
+    radius="104"
+    height="8"    
+    required_tag="item"
+    _tags="offer_item"
     destroy_this_entity_when_triggered="0"
     >
   </CollisionTriggerComponent>

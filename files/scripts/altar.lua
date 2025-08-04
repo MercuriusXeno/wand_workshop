@@ -1,54 +1,16 @@
 dofile_once("data/scripts/lib/utilities.lua")
 dofile_once("mods/wand_workshop/files/scripts/component_utils.lua")
 dofile_once("mods/wand_workshop/files/scripts/debug.lua")
+
 Log("altar script loaded")
 -- important constants used for consistency/cleanup
-local altar_offset_x = 0
-local altar_offset_y = -5
-local workshop_altar_tag = "workshop_altar"
+local align_offset_x = 0
+local hover_offset_y = -5
+local target_stat_buffer = "target_statbuffer"
 local offer_altar_tag = "offer_altar"
 local target_altar_tag = "target_altar"
-local target_stat_buffer = "target_statbuffer"
 local target_pickup_script = "mods/wand_workshop/files/scripts/target_pickup_script.lua"
 local offer_pickup_script = "mods/wand_workshop/files/scripts/offer_pickup_script.lua"
-local wand_stats = {
-    {
-        property = "fire_rate_wait",
-        object = "gunaction_config",
-        var_field = "value_int",
-        formula = "min"
-    },
-    {
-        property = "reload_time",
-        object = "gun_config",
-        var_field = "value_int",
-        formula = "min"
-    },
-    {
-        property = "mana_max",
-        object = nil,
-        var_field = "value_int",
-        formula = "loop"
-    },
-    {
-        property = "mana_charge_speed",
-        object = nil,
-        var_field = "value_int",
-        formula = "loop"
-    },
-    {
-        property = "spread_degrees",
-        object = "gunaction_config",
-        var_field = "value_int",
-        formula = "min"
-    },
-    {
-        property = "deck_capacity",
-        object = "gun_config",
-        var_field = "value_int",
-        formula = "max"
-    }
-}
 
 ---Gets the item at the altar provided and makes it hover and glow particles.
 ---Centers it on the altar if it's the target altar, but offerings float wherever they
@@ -71,32 +33,9 @@ function Do_Hover(altar_id, item_id)
 
     -- if the item is a wand we do a couple more things to it for effect.
     local is_wand = EntityHasTag(item_id, "wand")
-    if is_wand then Setup_Floating_Wands(item_id, is_target_altar) end
+    if is_wand then Setup_Floating_Wands(item_id) end
 end
 
----Sets up wands for hovering with effects such as particles emitting,
----and the pickup animations for the target wand, in particular.
----@param item_id any
-function Setup_Floating_Wands(item_id, is_target_altar)
-    Make_Wand_Glowy(item_id)
-    if is_target_altar then Make_Wand_Pickup_Fancy(item_id) end
-end
-
----Makes the wand have some particles like shop wands and wands you're seeing for the first time.
----@param item_id any
-function Make_Wand_Glowy(item_id)
-    local particle_comp = EntityGetFirstComponentWithVariable(item_id, "SpriteParticleEmitterComponent",
-        "velocity_always_away_from_center", nil)
-    if particle_comp ~= nil then EntitySetComponentIsEnabled(item_id, particle_comp, true) end
-end
-
----Gives the wand its snazzy pickup script for picking up new wands.
----@param item_id any
-function Make_Wand_Pickup_Fancy(item_id)
-    local luaComponent = EntityGetFirstComponentWithVariable(item_id, "LuaComponent", "script_item_picked_up",
-        "data/scripts/particles/wand_pickup.lua")
-    if luaComponent ~= nil then EntitySetComponentIsEnabled(item_id, luaComponent, true) end
-end
 
 ---Return the x, y values of the place the item should hover. The centering
 ---depends on whether it is the target altar, which centers the item. Otherwise the item
@@ -111,22 +50,9 @@ function Get_Hover_Transform(item_id, altar_id, is_target_altar)
     -- note the y is discarded here irrespective of anything. y is always the altar's.
     local item_x, item_y = EntityGetTransform(item_id)
     -- the target altar centers the hovered item, the offerings do not center
-    local result_x = (is_target_altar and altar_x or item_x) + altar_offset_x
-    local result_y = altar_y + altar_offset_y
+    local result_x = (is_target_altar and altar_x or item_x) + align_offset_x
+    local result_y = altar_y + hover_offset_y
     return result_x, result_y
-end
-
----Returns the altar parent of a given item. This is the same regardless of what altar,
----but note there is a check to ensure we're not somehow calling this from a non-altar.
----This is probably unnecessary but there out of ignorant paranoia.
----@param item_id any
----@return number
-function Get_Parent_Altar(item_id)
-    local result = EntityGetParent(item_id)
-    if not EntityHasTag(result, workshop_altar_tag) then
-        result = 0
-    end
-    return result
 end
 
 ---Detect if the inventory of a provided entity (presumed to be an item)
@@ -139,26 +65,26 @@ function Is_Inventory(entity_id)
 end
 
 ---Get the closest altar with the provided tag to another altar
----@param altar_id any
+---@param entity_id any
 ---@param tag any
 ---@return number
-function Get_Closest_Altar(altar_id, tag)
-    local x, y = EntityGetTransform(altar_id)
+function Get_Closest_Altar(entity_id, tag)
+    local x, y = EntityGetTransform(entity_id)
     return EntityGetClosestWithTag(x, y, tag)
 end
 
----Get the target altar closest to a given altar
----@param altar_id any
+---Get the target altar closest to a given entity
+---@param entity_id any
 ---@return number
-function Get_Target_Altar(altar_id)
-    return Get_Closest_Altar(altar_id, target_altar_tag)
+function Get_Target_Altar(entity_id)
+    return Get_Closest_Altar(entity_id, target_altar_tag)
 end
 
----Get the offering altar closest to a given altar
----@param altar_id any
+---Get the offering altar closest to a given entity
+---@param entity_id any
 ---@return number
-function Get_Offer_Altar(altar_id)
-    return Get_Closest_Altar(altar_id, offer_altar_tag)
+function Get_Offer_Altar(entity_id)
+    return Get_Closest_Altar(entity_id, offer_altar_tag)
 end
 
 ---Return the target item of the target altar
@@ -207,18 +133,15 @@ end
 ---Makes it hover as needed.
 ---@param altar_id any
 ---@param item_id any
-function Collide(altar_id, item_id)
+function Collide(altar_id, item_id, is_target_altar)
     -- don't collide with the player's inventory
     if Is_Inventory(item_id) then return end
 
-    -- get the target altar of this altar room
-    local target_altar_id = Get_Target_Altar(altar_id)
+    -- get the target altar of this altar room if it isn't the target altar
+    local target_altar_id = is_target_altar and altar_id or Get_Target_Altar(altar_id)
 
     -- get the target of the altar room, assuming it exists
     local target_item_id = Get_Target(target_altar_id)
-
-    -- determine if the altar_id is for the target altar
-    local is_target_altar = target_altar_id == altar_id
 
     -- if we are an empty target altar, try targeting this item
     if is_target_altar and target_item_id == nil then
@@ -226,7 +149,6 @@ function Collide(altar_id, item_id)
         if Is_Valid_Target(item_id) then
             -- reserve the original item stats, whatever the item is
             Reserve_Original_Target_Item(altar_id, item_id)
-            -- link the item to the altar (it's a child)
             Link_Item(altar_id, item_id)
             -- disable our collision as long as we have our target
             Set_Target_Altar_Collision(altar_id, false)
@@ -234,11 +156,27 @@ function Collide(altar_id, item_id)
         -- if we are the offering altar and the target exists
     elseif not is_target_altar and target_item_id ~= nil then
         -- determine the type of target and see if the colliding item is that type
-        if Is_Type_Matched(target_item_id, item_id) then
-            -- link the item to the altar (it's a child)
+        if Is_Type_Matched(target_item_id, item_id) and not Is_Attached_To_Altar(altar_id, item_id) then
             Link_Item(altar_id, item_id)
         end
     end
+end
+
+---Returns true if the given item_id is currently linked to the altar.
+---@param altar_id integer
+---@param item_id integer
+---@return boolean
+function Is_Attached_To_Altar(altar_id, item_id)
+    local comps = EntityGetComponent(altar_id, "VariableStorageComponent") or {}
+    for _, comp in ipairs(comps) do
+        if ComponentHasTag(comp, "altar_link") then
+            local linked_id = ComponentGetValue2(comp, "value_int")
+            if linked_id == item_id then
+                return true
+            end
+        end
+    end
+    return false
 end
 
 ---Turn the glowy altar particles on
@@ -252,8 +190,8 @@ end
 ---@param altar_id any
 ---@param item_id any
 function Link_Item(altar_id, item_id)
-    -- make the item a child of the altar
-    EntityAddChild(altar_id, item_id)
+    -- link the item to the altar using a variable component
+    Couple_Item_To_Altar(item_id, altar_id)
 
     -- make the item hover
     Do_Hover(altar_id, item_id)
@@ -267,6 +205,22 @@ function Link_Item(altar_id, item_id)
 
     -- refresh the result of the recipe, whatever that entails.
     Update_Result(altar_id)
+end
+
+---Tethers an item to an altar using a variable storage component
+---on the altar to remember that the wand is attached to it.
+---@param item_id any
+---@param altar_id any
+function Couple_Item_To_Altar(item_id, altar_id)
+    local is_wand = Is_Wand(item_id)
+    local item_type = is_wand and "wand" or "flask"
+
+    EntityAddComponent2(altar_id, "VariableStorageComponent", {
+        _tags = "altar_link",
+        name = "linked_item",
+        value_int = item_id,
+        value_string = item_type,
+    })
 end
 
 ---Bind the pickup script to an item. This is the script responsible for unlinking
@@ -285,12 +239,12 @@ function Attach_Pickup_Script(altar_id, item_id)
     EntitySetComponentIsEnabled(item_id, component_id, true)
 end
 
----Handle decoupling an altar from any of its held items. The altar is the parent in either offering or target.
+---Handle decoupling an altar from any of its held items.
 ---@param altar_id any
 ---@param item_id any
 function Unlink_Item(altar_id, item_id)
     -- unlink the item from this altar, assuming it is attached to it
-    if EntityGetParent(item_id) == altar_id then EntityRemoveFromParent(item_id) end
+    Decouple_Item_From_Altar(altar_id, item_id)
 
     -- the target altar is special for having its collision disabled when an item is on it
     Set_Target_Altar_Collision(altar_id, true)
@@ -302,6 +256,19 @@ function Unlink_Item(altar_id, item_id)
     Update_Result(altar_id)
 end
 
+---Detaches an item from its altar "owner" so it is no
+---longer considered in the pool for calculations/recipes
+---@param altar_id any
+---@param item_id any
+function Decouple_Item_From_Altar(altar_id, item_id)
+    local comps = EntityGetComponent(altar_id, "VariableStorageComponent") or {}
+    for _, comp in ipairs(comps) do
+        if ComponentHasTag(comp, "altar_link") and ComponentGetValue2(comp, "value_int") == item_id then
+            EntityRemoveComponent(altar_id, comp)
+        end
+    end
+end
+
 ---Called when the player picks up the target result from the altar.
 ---@param altar_id any
 ---@param item_id any
@@ -311,7 +278,7 @@ function Take_Result(altar_id, item_id)
     -- if there are any linked offerings, destroy them
     Destroy_Recipe_Linked_Items(offer_altar_id)
 
-    -- unlink the item at the end so the altar isn't glowing and they're not related anymore
+    -- clean up the reference to the item so it isn't still considered linked.
     Unlink_Item(altar_id, item_id)
 end
 
@@ -390,31 +357,50 @@ function Clean_Precision(d)
     return d
 end
 
----Gets any wand-children of the altar in question.
+---Gets any wands attached to the altar of the altar in question.
 ---@param altar_id any
 ---@return number[]
 function Get_Wands(altar_id)
-    local children = EntityGetAllChildren(altar_id)
+    local altar_items = Get_Altar_Items(altar_id)
     local result = {}
-    if children ~= nil then
-        for i, child in ipairs(children) do
-            if EntityHasTag(child, "wand") then result[#result + 1] = child end
+    if altar_items ~= nil then
+        for i, item in ipairs(altar_items) do
+            if EntityHasTag(item, "wand") then result[#result + 1] = item end
         end
     end
     return result
 end
 
----Gets any flask-children of the altar in question.
+---Gets any flasks attached to the altar in question.
 ---@param altar_id any
 ---@return number[]
 function Get_Flasks(altar_id)
-    local children = EntityGetAllChildren(altar_id)
+    local altar_items = Get_Altar_Items(altar_id)
     local result = {}
-    if children ~= nil then
-        for i, child in ipairs(children) do
-            if EntityHasTag(child, "potion") then result[#result + 1] = child end
+    if altar_items ~= nil then
+        for i, item in ipairs(altar_items) do
+            if EntityHasTag(item, "potion") then result[#result + 1] = item end
         end
     end
+    return result
+end
+
+---Returns the item ids that are attached to the altar by VSC.
+---@param altar_id any
+---@return table
+function Get_Altar_Items(altar_id)
+    local comps = EntityGetComponent(altar_id, "VariableStorageComponent") or {}
+    local result = {}
+
+    for _, comp in ipairs(comps) do
+        if ComponentHasTag(comp, "altar_link") then
+            local id = ComponentGetValue2(comp, "value_int")
+            if EntityGetIsAlive(id) then
+                result[#result + 1] = id
+            end
+        end
+    end
+
     return result
 end
 
@@ -423,11 +409,13 @@ end
 ---@param altar_id any
 function Update_Result(altar_id)
     -- find the offering altar
-    local offer_altar_id = Get_Offer_Altar(altar_id)
     local target_altar_id = Get_Target_Altar(altar_id)
     local target_item_id = Get_Target(target_altar_id)
 
+    if target_item_id == nil then return end
+
     -- determine if the recipe is a wand or flask
+    local offer_altar_id = Get_Offer_Altar(altar_id)
     if Is_Wand(target_item_id) then
         Calculate_Wand_Stats(target_item_id, target_altar_id, offer_altar_id)
     else
@@ -435,7 +423,97 @@ function Update_Result(altar_id)
     end
 end
 
----Calculate the stat buffer of the sacrifical 
+---Called when linking a target item. Reserves the stats of a wand or flask
+---so its original can be restored to the state it was prior to improvements.
+---@param altar_id any
+---@param item_id any
+function Reserve_Original_Target_Item(altar_id, item_id)
+    if Is_Wand(item_id) then
+        Reserve_Wand_Stats(altar_id, item_id)
+    elseif Is_Flask(item_id) then
+        Reserve_Flask_State(altar_id, item_id)
+    end
+end
+
+---Wipe out the old reserve stats of the variable storage component of the altar.
+---This is called when reserving wand OR flask stats or when taking the result.
+---@param altar_id any
+function Clear_Old_Reserve_Stats(altar_id)
+    local old_comps = EntityGetComponent(altar_id, "VariableStorageComponent") or {}
+    for _, comp in ipairs(old_comps) do
+        if ComponentHasTag(comp, target_stat_buffer) then
+            EntityRemoveComponent(altar_id, comp)
+        end
+    end
+end
+
+--== WAND MERGING ==--
+
+
+local wand_stats = {
+    {
+        property = "fire_rate_wait",
+        object = "gunaction_config",
+        var_field = "value_int",
+        formula = "min"
+    },
+    {
+        property = "reload_time",
+        object = "gun_config",
+        var_field = "value_int",
+        formula = "min"
+    },
+    {
+        property = "mana_max",
+        object = nil,
+        var_field = "value_int",
+        formula = "loop"
+    },
+    {
+        property = "mana_charge_speed",
+        object = nil,
+        var_field = "value_int",
+        formula = "loop"
+    },
+    {
+        property = "spread_degrees",
+        object = "gunaction_config",
+        var_field = "value_int",
+        formula = "min"
+    },
+    {
+        property = "deck_capacity",
+        object = "gun_config",
+        var_field = "value_int",
+        formula = "max"
+    }
+}
+
+---Sets up wands for hovering with effects such as particles emitting,
+---and the pickup animations for the target wand, in particular.
+---@param item_id any
+function Setup_Floating_Wands(item_id)
+    Make_Wand_Glowy(item_id)
+    Make_Wand_Pickup_Fancy(item_id)
+end
+
+---Makes the wand have some particles like shop wands and wands you're seeing for the first time.
+---@param item_id any
+function Make_Wand_Glowy(item_id)
+    local particle_comp = EntityGetFirstComponentWithVariable(item_id, "SpriteParticleEmitterComponent",
+        "velocity_always_away_from_center", nil)
+    if particle_comp ~= nil then EntitySetComponentIsEnabled(item_id, particle_comp, true) end
+end
+
+---Gives the wand its snazzy pickup script for picking up new wands.
+---@param item_id any
+function Make_Wand_Pickup_Fancy(item_id)
+    local luaComponent = EntityGetFirstComponentWithVariable(item_id, "LuaComponent", "script_item_picked_up",
+        "data/scripts/particles/wand_pickup.lua")
+    if luaComponent ~= nil then EntitySetComponentIsEnabled(item_id, luaComponent, true) end
+end
+
+---Calculate the stat buffer of the sacrifical
 ---wands and apply it to the target wand.
 ---@param target_wand_id any
 ---@param target_altar_id any
@@ -493,7 +571,7 @@ function Combine_Wand_Stats(target_stats, offering_stats_list)
             if final then
                 combined_stats[#combined_stats + 1] = {
                     name = name,
-                    value_int = math.floor(final + 0.5),  -- round
+                    value_int = math.floor(final + 0.5), -- round
                     _tags = target_stat_buffer
                 }
             end
@@ -507,7 +585,8 @@ end
 ---@param values number[]
 ---@return number
 function Blend_Stat_Loop(values)
-    local pool = { table.unpack(values) }
+    local unpack = unpack or table.unpack -- 5.1 v 5.2ism
+    local pool = { unpack(values) }
 
     -- Sort ascending (worst to best)
     table.sort(pool)
@@ -531,7 +610,7 @@ function Blend_Stat_Loop(values)
         end
     end
 
-    return pool[1]  -- final result
+    return pool[1] -- final result
 end
 
 ---Apply a stat table back to a wand's AbilityComponent
@@ -558,40 +637,6 @@ function Apply_Wand_Stats(wand_id, stats_table)
                 end
                 break
             end
-        end
-    end
-end
-
----Called when updating the results of altar offerings that are for flask merging.
----Determines any potential recipes to improve the target flask. Attempts to find
----material recipes eagerly, prior to falling back to more basic capacity merging.
----@param target_item_id any
----@param target_altar_id any
----@param offer_altar_id any
-function Calculate_Flask_Stats(target_item_id, target_altar_id, offer_altar_id)
-    --STUB
-end
-
----Called when linking a target item. Reserves the stats of a wand or flask
----so its original can be restored to the state it was prior to improvements.
----@param altar_id any
----@param item_id any
-function Reserve_Original_Target_Item(altar_id, item_id)
-    if Is_Wand(item_id) then
-        Reserve_Wand_Stats(altar_id, item_id)
-    elseif Is_Flask(item_id) then
-        Reserve_Flask_Stats(item_id)
-    end
-end
-
----Wipe out the old reserve stats of the variable storage component of the altar.
----This is called when reserving wand stats or when taking the result.
----@param altar_id any
-function Clear_Old_Reserve_Stats(altar_id)
-    local old_comps = EntityGetComponent(altar_id, "VariableStorageComponent") or {}
-    for _, comp in ipairs(old_comps) do
-        if ComponentHasTag(comp, target_stat_buffer) then
-            EntityRemoveComponent(altar_id, comp)
         end
     end
 end
@@ -681,6 +726,350 @@ function Extract_Wand_Stat_Value(ability_comp, stat_def)
     end
 end
 
-function Reserve_Flask_Stats(item_id)
-    -- STUB
+--== FLASK MERGING ==--
+
+local flask_enchantments = {
+    tempered = { material = "ambrosia", max = 1, apply = Apply_Tempered },
+    -- you can only have one "inert", but if you have reactive, you have to cancel them one level at a time
+    inert = { material = "oil", max = 1, apply = Apply_Inert, negates = "reactive" },
+    reactive = { material = "toxic_sludge", max = 4, apply = Apply_Reactive, negates = "inert" },
+    remote = { material = "teleportatium", max = 1, apply = Apply_Remote }
+}
+
+local flask_enchant_prefix = "wand_workshop_flask_enchant_"
+
+---Returns a table of { name, amount } materials inside the flask
+---@param flask_id integer
+---@return table[]
+function Get_Flask_Materials(flask_id)
+    local result = {}
+    local comp = EntityGetFirstComponentIncludingDisabled(flask_id, "MaterialInventoryComponent")
+    if not comp then return result end
+
+    local count = ComponentGetValue2(comp, "count_per_material_type")
+    local mats = ComponentGetValue2(comp, "material_slots")
+
+    for i = 1, #mats do
+        local mat_id = mats[i]
+        if mat_id ~= 0 then
+            local name = CellFactory_GetName(mat_id)
+            local amount = count[i]
+            if amount and amount > 0 then
+                result[#result + 1] = {
+                    name = name,
+                    amount = amount
+                }
+            end
+        end
+    end
+
+    return result
+end
+
+---Returns the amount of a given material in the flask
+---@param flask_id integer
+---@param material_name string
+---@return integer
+function Get_Material_Amount(flask_id, material_name)
+    local materials = Get_Flask_Materials(flask_id)
+    for _, entry in ipairs(materials) do
+        if entry.name == material_name then
+            return entry.amount
+        end
+    end
+    return 0
+end
+
+---Check whether a flask has a specific enchantment.
+---@param flask_id integer
+---@param enchantment_key string
+---@return number
+function Get_Level_Of_Flask_Enchantment(flask_id, enchantment_key)
+    local key = flask_enchant_prefix .. enchantment_key
+    local comps = EntityGetComponentIncludingDisabled(flask_id, "VariableStorageComponent") or {}
+
+    for _, comp in ipairs(comps) do
+        if ComponentGetValue2(comp, "name") == key then
+            return ComponentGetValue2(comp, "value_int")
+        end
+    end
+
+    return 0
+end
+
+--- Reserve the current flask state (materials, enchantments) on the altar
+---@param altar_id integer
+---@param flask_id integer
+function Reserve_Flask_State(altar_id, flask_id)
+    -- clear old reservation
+    Clear_Old_Reserve_Stats(altar_id)
+
+    -- reserve material contents
+    local materials = Get_Flask_Materials(flask_id)
+    for i, mat in ipairs(materials) do
+        EntityAddComponent2(altar_id, "VariableStorageComponent", {
+            name = "reserved_material_" .. i,
+            value_string = mat,
+            _tags = target_stat_buffer
+        })
+    end
+
+    -- reserve enchantments (and their levels)
+    for key, _ in pairs(flask_enchantments) do
+        local level = Get_Level_Of_Flask_Enchantment(flask_id, key)
+        if level > 0 then
+            EntityAddComponent2(altar_id, "VariableStorageComponent", {
+                name = "reserved_enchant_" .. key,
+                value_int = level,
+                _tags = target_stat_buffer
+            })
+        end
+    end
+end
+
+--- Retrieve reserved flask state from the target altar
+---@param altar_id integer
+---@return table state { materials: string[], enchantments: table<string, integer> }
+function Get_Reserved_Flask_State(altar_id)
+    local comps = EntityGetComponentIncludingDisabled(altar_id, "VariableStorageComponent") or {}
+    local materials = {}
+    local enchantments = {}
+
+    for _, comp in ipairs(comps) do
+        if ComponentHasTag(comp, target_stat_buffer) then
+            local name = ComponentGetValue2(comp, "name")
+
+            if string.sub(name, 1, 18) == "reserved_material_" then
+                local material = ComponentGetValue2(comp, "value_string")
+                if material ~= "" then
+                    materials[#materials + 1] = material
+                end
+            elseif string.sub(name, 1, 17) == "reserved_enchant_" then
+                local enchant = string.sub(name, 18)
+                local level = ComponentGetValue2(comp, "value_int")
+                enchantments[enchant] = level
+            end
+        end
+    end
+
+    return { materials = materials, enchantments = enchantments }
+end
+
+---Combine reserved flask state with enchantment effects and merged flask contents.
+---@param reserved table
+---@param effects table<string, boolean>
+---@param merge_flasks integer[]
+---@return table
+function Combine_Flask_State(reserved, effects, merge_flasks)
+  local result = {
+    enchantments = {},
+    materials = {},
+    capacity = reserved.capacity or 0
+  }
+
+  -- Clone reserved materials
+  local material_map = {}
+  for _, mat in ipairs(reserved.materials or {}) do
+    material_map[mat.name] = (material_map[mat.name] or 0) + mat.amount
+  end
+
+  -- Add enchantments, respecting max level
+  for key, _ in pairs(effects) do
+    local enchant = flask_enchantments[key]
+    if enchant then
+      local current = reserved.enchantments and reserved.enchantments[key] or 0
+      local level = math.min(current + 1, enchant.max or 1)
+      result.enchantments[key] = level
+    end
+  end
+
+  -- Negation pass: cancel out conflicting enchantments
+  for key, level in pairs(result.enchantments) do
+    local def = flask_enchantments[key]
+    local inverse = def and def.negates
+    if inverse and result.enchantments[inverse] then
+      local other = result.enchantments[inverse]
+      local delta = level - other
+
+      if delta > 0 then
+        result.enchantments[key] = delta
+        result.enchantments[inverse] = nil
+      elseif delta < 0 then
+        result.enchantments[inverse] = -delta
+        result.enchantments[key] = nil
+      else
+        result.enchantments[key] = nil
+        result.enchantments[inverse] = nil
+      end
+    end
+  end
+
+  -- Add merged flask contents and capacity
+  for _, flask_id in ipairs(merge_flasks) do
+    local mat_list = Get_Flask_Materials(flask_id)
+    for _, mat in ipairs(mat_list) do
+      material_map[mat.name] = (material_map[mat.name] or 0) + mat.amount
+    end
+
+    local comp = EntityGetFirstComponentIncludingDisabled(flask_id, "MaterialInventoryComponent")
+    if comp then
+      result.capacity = result.capacity + ComponentGetValue2(comp, "bar_max_amount")
+    end
+  end
+
+  -- Collapse material map to array
+  for name, amount in pairs(material_map) do
+    result.materials[#result.materials + 1] = { name = name, amount = amount }
+  end
+
+  return result
+end
+
+---Apply the combined flask state to the given flask entity.
+---@param flask_id integer
+---@param combined table
+function Apply_Flask_State(flask_id, combined)
+  local comp = EntityGetFirstComponentIncludingDisabled(flask_id, "MaterialInventoryComponent")
+  if not comp then
+    GamePrint("Apply_Flask_State: no material component on flask")
+    return
+  end
+
+  -- Apply enchantments
+  for key, level in pairs(combined.enchantments or {}) do
+    local enchant = flask_enchantments[key]
+    if enchant and enchant.apply then
+      enchant.apply(flask_id, level)
+    end
+  end
+
+  -- Set new flask capacity
+  ComponentSetValue2(comp, "bar_max_amount", combined.capacity)
+
+  -- Clear all material slots
+  local mat_slots = ComponentGetValue2(comp, "material_slots") or {}
+  for i = 1, #mat_slots do
+    mat_slots[i] = 0
+  end
+
+  local count_slots = {}
+  for i = 1, #mat_slots do count_slots[i] = 0 end
+
+  -- Add materials to available slots
+  for _, mat in ipairs(combined.materials or {}) do
+    local mat_id = CellFactory_GetType(mat.name)
+    local slot_found = false
+
+    for i = 1, #mat_slots do
+      if mat_slots[i] == 0 then
+        mat_slots[i] = mat_id
+        count_slots[i] = mat.amount
+        slot_found = true
+        break
+      elseif mat_slots[i] == mat_id then
+        count_slots[i] = count_slots[i] + mat.amount
+        slot_found = true
+        break
+      end
+    end
+
+    if not slot_found then
+      GamePrint("Apply_Flask_State: ran out of slots for material " .. tostring(mat.name))
+    end
+  end
+
+  -- Set back into component
+  ComponentSetValue2(comp, "material_slots", mat_slots)
+  ComponentSetValue2(comp, "count_per_material_type", count_slots)
+end
+
+--- Make flask unbreakable by removing its DamageModelComponent(s)
+function Apply_Tempered(flask_id, level)
+  local comps = EntityGetComponentIncludingDisabled(flask_id, "DamageModelComponent") or {}
+  for _, comp in ipairs(comps) do
+    EntityRemoveComponent(flask_id, comp)
+  end
+end
+
+--- Reduce reaction rate by 20 × level (defaults to 20 if not present)
+function Apply_Inert(flask_id, level)
+  local comps = EntityGetComponentIncludingDisabled(flask_id, "MaterialInventoryComponent") or {}
+  for _, comp in ipairs(comps) do
+    local default = 20
+    local rate = default - (20 * level)
+    ComponentSetValue2(comp, "reaction_rate", math.max(0, rate))
+  end
+end
+
+--- Increase reaction rate from 20 to 100 in 5 steps (Reactive I-V)
+function Apply_Reactive(flask_id, level)
+  local comps = EntityGetComponentIncludingDisabled(flask_id, "MaterialInventoryComponent") or {}
+  for _, comp in ipairs(comps) do
+    local rate = 20 + (level * 20)
+    ComponentSetValue2(comp, "reaction_rate", math.min(rate, 100))
+  end
+end
+
+--- Mark the flask as "Remote" using a VariableStorageComponent
+---@param flask_id integer
+---@param level integer
+function Apply_Remote(flask_id, level)
+  local key = flask_enchant_prefix .. "remote"
+
+  -- Remove any existing component with this key
+  local comps = EntityGetComponentIncludingDisabled(flask_id, "VariableStorageComponent") or {}
+  for _, comp in ipairs(comps) do
+    if ComponentGetValue2(comp, "name") == key then
+      EntityRemoveComponent(flask_id, comp)
+    end
+  end
+
+  -- Add new component with level set
+  EntityAddComponent2(flask_id, "VariableStorageComponent", {
+    name = key,
+    value_int = level,
+    value_string = "Remote Flask",
+    _tags = "flask_enchantment"
+  })
+end
+
+---@param target_flask_id integer
+---@param target_altar_id integer
+---@param offer_altar_id integer
+function Calculate_Flask_Stats(target_flask_id, target_altar_id, offer_altar_id)
+  local reserved = Get_Reserved_Flask_State(target_altar_id)
+  local offer_flasks = Get_Flasks(offer_altar_id)
+
+  local effects, merge_flasks = Scrape_Enchantments_From_Offerings(offer_flasks)
+
+  local combined = Combine_Flask_State(reserved, effects, merge_flasks)
+  Apply_Flask_State(target_flask_id, combined)
+end
+
+---@param flask_ids integer[]
+---@return table<string, boolean> effects  -- map of enchantments to apply
+---@return integer[] merge_flasks          -- flasks to merge
+function Scrape_Enchantments_From_Offerings(flask_ids)
+  local effects = {}
+  local merge_flasks = {}
+
+  for _, flask_id in ipairs(flask_ids) do
+    local is_enchant = false
+
+    for key, enchant in pairs(flask_enchantments) do
+      local amount = Get_Material_Amount(flask_id, enchant.material)
+
+      if amount >= 1000 then
+        effects[key] = true
+        is_enchant = true
+        break -- only one enchantment per flask
+      end
+    end
+
+    if not is_enchant then
+      merge_flasks[#merge_flasks + 1] = flask_id
+    end
+  end
+
+  return effects, merge_flasks
 end

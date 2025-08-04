@@ -1,6 +1,4 @@
-<Entity
-  tags="workshop_altar"
-  >
+<Entity>
   
   <ParticleEmitterComponent 
     _enabled="0"
