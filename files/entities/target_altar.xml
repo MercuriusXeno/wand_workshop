@@ -1,17 +1,26 @@
-<Entity
-  tags="target_altar"
-  >
+<Entity tags="target_altar">
+  
   <Base file="mods/wand_workshop/files/entities/base_altar.xml">
     <ParticleEmitterComponent
-      image_animation_file="mods/wand_workshop/files/entities/altar/target_altar_runes.png"
+      image_animation_file="mods/wand_workshop/files/entities/target_altar_runes.png"
       emitted_material_name="spark_teal"
       />
   </Base>
 
   <CollisionTriggerComponent
-    width="23"
-    height="1"
-    _tags="target_grab"
+    width="25"
+    height="10"
+    required_tag="wand"
+    _tags="target_wand"
+    destroy_this_entity_when_triggered="0"
+    >
+  </CollisionTriggerComponent>
+
+  <CollisionTriggerComponent
+    width="25"
+    height="10"
+    required_tag="potion"
+    _tags="target_flask"
     destroy_this_entity_when_triggered="0"
     >
   </CollisionTriggerComponent>

@@ -1,6 +1,7 @@
 dofile_once("data/scripts/lib/utilities.lua")
 dofile_once("mods/wand_workshop/files/scripts/component_utils.lua")
-
+dofile_once("mods/wand_workshop/files/scripts/debug.lua")
+Log("altar script loaded")
 -- important constants used for consistency/cleanup
 local altar_offset_x = 0
 local altar_offset_y = -5
@@ -120,7 +121,7 @@ end
 ---This is probably unnecessary but there out of ignorant paranoia.
 ---@param item_id any
 ---@return number
-function Get_Altar(item_id)
+function Get_Parent_Altar(item_id)
     local result = EntityGetParent(item_id)
     if not EntityHasTag(result, workshop_altar_tag) then
         result = 0

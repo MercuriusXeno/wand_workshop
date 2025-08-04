@@ -1,10 +1,17 @@
-RegisterSpawnFunction( 0xff0a17a9 , "SpawnTargetAltar")
-RegisterSpawnFunction( 0xff6a17a0 , "SpawnOfferAltar")
+dofile_once("mods/wand_workshop/files/scripts/debug.lua")
+Log("wand_workshop altar_left.lua running")
 
-function SpawnTargetAltar(x, y)
-  EntityLoad("mods/wand_workshop/files/entities/altar/target_altar.xml", x, y)
+RegisterSpawnFunction( 0xff6a17a9 , "spawn_target_altar")
+RegisterSpawnFunction( 0xff0a17a0 , "spawn_offer_altar")
+
+function spawn_target_altar(x, y)
+  Log("Target altar spawned")
+  EntityLoad("mods/wand_workshop/files/entities/target_altar.xml", x, y)
 end
 
-function SpawnOfferAltar(x, y)
-  EntityLoad("mods/wand_workshop/files/entities/altar/offer_altar.xml", x, y)
+function spawn_offer_altar(x, y)
+  Log("Offering altar spawned")
+  EntityLoad("mods/wand_workshop/files/entities/offer_altar.xml", x, y)
 end
+
+Log("wand_workshop altar_left.lua ran")
