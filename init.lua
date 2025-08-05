@@ -4,7 +4,13 @@ Log("wand_workshop init.lua running")
 
 ModLuaFileAppend( "data/scripts/biomes/temple_altar_left.lua", "mods/wand_workshop/files/biomes/temple_altar_left.lua" )
 
-Log("wand_workshop init.lua ran")
+
+-- stitch translations
+local translations = ModTextFileGetContent("data/translations/common.csv")
+local new_translations = ModTextFileGetContent("mods/wand_workshop/files/translations/descriptions.csv")
+translations = translations .. "\n" .. new_translations .. "\n"
+translations = translations:gsub("\r", ""):gsub("\n\n+", "\n")
+ModTextFileSetContent("data/translations/common.csv", translations)
 
 -- helpers to stop me from fat fingering keys
 local emit_last_key = "wand_workshop.emit_last"
@@ -16,6 +22,8 @@ local is_debug_emit_allowed_key = "wand_workshop.is_debug_emit_allowed"
 ModSettingSet(emit_cooldown_key, "60")
 ModSettingSet(is_debug_mode_key, "true") -- this enables logging globally
 ModSettingSet(is_debug_emit_allowed_key, "false") -- this enables logging globally    
+
+Log("wand_workshop init.lua ran")
 
 function OnWorldInitialized() -- This is called once the game world is initialized. Doesn't ensure any world chunks actually exist. Use OnPlayerSpawned to ensure the chunks around player have been loaded or created.	
     -- Some global stuff I do for debugs to make my brain hurt less
