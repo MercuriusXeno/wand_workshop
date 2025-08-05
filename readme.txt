@@ -17,11 +17,11 @@ FLASK MERGING
 =============
 Place a flask on the altar and then offer the rest of the recipe.
 
-Any Flask <- Any Empty Flask = Kept Flask with combined capacity
-Any Flask <- 1000 Ambrosia Flask = Kept Flask with "Tempered", becoming unbreakable.
-Any Flask <- 1000 Oil Flask = Kept Flask with "Inert", decreases reactivity within.
-Any Flask <- 1000 Toxic Sludge = Kept Flask with "Reactive", increases reactivity within. (Cancels out inert)
-Any Flask <- 1000 Teleportatium Flask = Kept Flask with "Remote", the mouth of the flask is also the mouse cursor.
+Any Flask <- Any Flask = Kept Flask with combined capacity and contents. Beware reactions.
+Any Flask <- Emerald Tablet = Kept Flask with "Heavy", becoming unbreakable.
+Any Flask <- Stone Tablet = Kept Flask with "Inert", reduces reactivity by 20. (Set to 0 if default) (Reactive and Inert cancel out)
+Any Flask <- Book = Kept Flask with "Reactive", increases reactivity by 20. Stacks up to 4. (Reactive and Inert cancel out)
+Any Flask <- Notes on Grand Alchemy = Kept Flask with "Remote", the mouth of the flask is also the mouse cursor.
 
 (I may expand upon this list, if I get the urge. This felt like a good place to stop and test.)
 

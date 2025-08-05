@@ -11,8 +11,18 @@
     width="137"
     radius="104"
     height="8"    
-    required_tag="item"
-    _tags="offer_item"
+    required_tag="wand"
+    _tags="workshop_altar_collision"
+    destroy_this_entity_when_triggered="0"
+    >
+  </CollisionTriggerComponent>
+
+  <CollisionTriggerComponent
+    width="137"
+    radius="104"
+    height="8"    
+    required_tag="potion"
+    _tags="workshop_altar_collision"
     destroy_this_entity_when_triggered="0"
     >
   </CollisionTriggerComponent>

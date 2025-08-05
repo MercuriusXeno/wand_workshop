@@ -1,6 +1,6 @@
 dofile_once("data/scripts/lib/utilities.lua")
 
-local debug_prefix = "-== WAND_WORKSHOP_DEBUG ==-"
+local debug_prefix = "-== WAND_WORKSHOP_DEBUG ==-   "
 local emit_last_key = "wand_workshop.emit_last"
 local emit_cooldown_key = "wand_workshop.emit_cooldown"
 local emit_particle = "data/entities/particles/poof_blue.xml"

@@ -6,5 +6,6 @@ Log("altar collision loaded")
 function collision_trigger(colliding_entity_id)
     local altar_id = GetUpdatedEntityID()
     local is_target_altar = EntityHasTag(altar_id, "target_altar")
+    --Log("collision firing on " .. colliding_entity_id)
     Collide(altar_id, colliding_entity_id, is_target_altar)
 end
