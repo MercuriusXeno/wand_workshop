@@ -1,3 +1,4 @@
+---@diagnostic disable: lowercase-global, missing-global-doc
 dofile_once("mods/wand_workshop/files/scripts/altar.lua")
 
 --don't rename this, big brain nolla hard coding

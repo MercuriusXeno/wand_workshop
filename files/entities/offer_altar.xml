@@ -2,28 +2,10 @@
 
   <Base file="mods/wand_workshop/files/entities/base_altar.xml">
     <ParticleEmitterComponent
-    image_animation_file="mods/wand_workshop/files/entities/offer_altar_runes.png"
-    emitted_material_name="spark_purple"
+      image_animation_file="mods/wand_workshop/files/entities/offer_altar_runes.png"
+      emitted_material_name="spark"
+      x_pos_offset_min="1"
+      x_pos_offset_max="1"
       />
   </Base>
-
-  <CollisionTriggerComponent
-    width="137"
-    radius="104"
-    height="8"    
-    required_tag="wand"
-    _tags="workshop_altar_collision"
-    destroy_this_entity_when_triggered="0"
-    >
-  </CollisionTriggerComponent>
-
-  <CollisionTriggerComponent
-    width="137"
-    radius="104"
-    height="8"    
-    required_tag="potion"
-    _tags="workshop_altar_collision"
-    destroy_this_entity_when_triggered="0"
-    >
-  </CollisionTriggerComponent>
 </Entity>

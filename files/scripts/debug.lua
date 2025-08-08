@@ -61,5 +61,3 @@ function Is_Debug_Emit_Allowed()
     
     return not is_cooling_down
 end
-
-Log("Debug lua loaded")

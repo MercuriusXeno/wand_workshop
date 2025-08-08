@@ -1,13 +1,13 @@
-<Entity>
+<Entity tags="workshop_altar">
   
   <ParticleEmitterComponent 
     _enabled="0"
     _tags="item_effect"
     gravity.y="0.0"
-    y_pos_offset_min="6"
-    y_pos_offset_max="6"
-    x_pos_offset_min="1"
-    x_pos_offset_max="1"
+    y_pos_offset_min="11"
+    y_pos_offset_max="11"
+    x_pos_offset_min="0"
+    x_pos_offset_max="0"
     lifetime_min="0.5"
     lifetime_max="1"
     count_min="1"
@@ -28,9 +28,11 @@
     >
 	</ParticleEmitterComponent>
 
+<!-- running this EVERY frame lets it intercept thrown potions more safely
+but it can be significantly slower than this (5-10 works great) -->
   <LuaComponent
-    script_collision_trigger_hit="mods/wand_workshop/files/scripts/altar_collision.lua"
-    execute_every_n_frame="-1"
+    execute_every_n_frame="1"
+    script_source_file="mods/wand_workshop/files/scripts/altar_detection.lua"
     >
   </LuaComponent>
 </Entity>

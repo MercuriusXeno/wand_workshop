@@ -6,24 +6,4 @@
       emitted_material_name="spark_teal"
       />
   </Base>
-
-  <CollisionTriggerComponent
-    width="25"
-    radius="19"
-    height="8"
-    required_tag="wand"
-    _tags="workshop_altar_collision"
-    destroy_this_entity_when_triggered="0"
-    >
-  </CollisionTriggerComponent>
-
-  <CollisionTriggerComponent
-    width="25"
-    radius="19"
-    height="8"
-    required_tag="potion"
-    _tags="workshop_altar_collision"
-    destroy_this_entity_when_triggered="0"
-    >
-  </CollisionTriggerComponent>
 </Entity>

@@ -18,10 +18,12 @@ FLASK MERGING
 Place a flask on the altar and then offer the rest of the recipe.
 
 Any Flask <- Any Flask = Kept Flask with combined capacity and contents. Beware reactions.
-Any Flask <- Emerald Tablet = Kept Flask with "Heavy", becoming unbreakable.
-Any Flask <- Stone Tablet = Kept Flask with "Inert", reduces reactivity by 20. (Set to 0 if default) (Reactive and Inert cancel out)
+Any Flask <- Kiauskivi = Kept Flask with "Tempered", becoming unbreakable.
+Any Flask <- Vuoksikivi = Kept Flask with "Flooding", one click dumps its contents. Fill Rate massively increased (does this do anything?)
+Any Flask <- Emerald Tablet = Kept Flask with "Inert", reduces reactivity by 20. (Set to 0 if default) (Reactive and Inert cancel out)
 Any Flask <- Book = Kept Flask with "Reactive", increases reactivity by 20. Stacks up to 4. (Reactive and Inert cancel out)
-Any Flask <- Notes on Grand Alchemy = Kept Flask with "Remote", the mouth of the flask is also the mouse cursor.
+Any Flask <- Ukkoskivi = Kept Flask with "Remote", the mouth of the flask is also the mouse cursor.
+Any Flask <- Henkevä Potu = Kept Flask with "Transmuting", convert other materials to the dominant flask material. Can't be changed.
 
 (I may expand upon this list, if I get the urge. This felt like a good place to stop and test.)
 
