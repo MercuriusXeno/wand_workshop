@@ -5,9 +5,6 @@ dofile_once("mods/wand_workshop/files/translations/append_localizations.lua")
 -- cursed biome splice for altar_left which hates me and wants me to be unhappy.
 dofile_once("data/scripts/lib/utilities.lua")
 if ModImageMakeEditable then
-    -- dimensions of altar_left are 512x282
-    -- to splice start +314 x, +86 y, in a 58x58 zone.
-    -- mountain_hall needs no changes, altar_left is cursed.
     local splice = function(original, splice, splice_x, splice_y)
         local id, _, _ = ModImageMakeEditable(original, 0, 0)
         local splice_id, end_x, end_y = ModImageMakeEditable(splice, 0, 0)
@@ -15,12 +12,14 @@ if ModImageMakeEditable then
             for x = splice_x, splice_x + end_x - 1 do
                 local c = ModImageGetPixel(splice_id, x - splice_x, y - splice_y)
                 local r, g, b, a = color_abgr_split(c)
-                if (a > 0) then ModImageSetPixel(id, x, y, c) end
+				-- clear or black [material] gets ignored - don't splice negative spaces
+                if a > 0 and r + g + b > 0 then ModImageSetPixel(id, x, y, c) end
             end
         end
     end
+	-- the material splice is a bit wider than the visual splice
     splice("data/biome_impl/temple/altar_left.png",
-        "mods/wand_workshop/files/biomes/temple/altar_left.png", 314, 86)
+        "mods/wand_workshop/files/biomes/temple/altar_left.png", 305, 86)
     splice("data/biome_impl/temple/altar_left_visual.png",
         "mods/wand_workshop/files/biomes/temple/altar_left_visual.png", 314, 86)
 end
