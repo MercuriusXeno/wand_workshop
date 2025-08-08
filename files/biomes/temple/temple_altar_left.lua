@@ -8,11 +8,9 @@ function init(x, y, w, h, ...)
   local scene_y = y + 346
   LoadPixelScene("mods/wand_workshop/files/biomes/temple/altar_left.png",
     "mods/wand_workshop/files/biomes/temple/altar_left_visual.png",
-    scene_x, scene_y, "", true, false, {}, 100, false) -- fucking with every flag to restore sanity
+    scene_x, scene_y, "", true)
 end
 
--- for reasons only god and the devil know the temple altar is off by one x AND y, despite
--- being FUCKING IDENTICAL to the mountain_hall in every. EVERY. possible. way.
 function spawn_target_altar(x, y)
   EntityLoad("mods/wand_workshop/files/entities/target_altar.xml", x + 1, y - 6)
 end
