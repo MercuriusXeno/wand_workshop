@@ -1,12 +1,36 @@
 dofile_once("mods/wand_workshop/files/scripts/debug.lua")
 dofile_once("mods/wand_workshop/files/scripts/setting_constants.lua")
 dofile_once("mods/wand_workshop/files/translations/append_localizations.lua")
+
+-- cursed biome splice for altar_left which hates me and wants me to be unhappy.
+dofile_once("data/scripts/lib/utilities.lua")
+if ModImageMakeEditable then
+    -- dimensions of altar_left are 512x282
+    -- to splice start +314 x, +86 y, in a 58x58 zone.
+    -- mountain_hall needs no changes, altar_left is cursed.
+    local splice = function(original, splice, splice_x, splice_y)
+        local id, _, _ = ModImageMakeEditable(original, 0, 0)
+        local splice_id, end_x, end_y = ModImageMakeEditable(splice, 0, 0)
+        for y = splice_y, splice_y + end_y - 1 do
+            for x = splice_x, splice_x + end_x - 1 do
+                local c = ModImageGetPixel(splice_id, x - splice_x, y - splice_y)
+                local r, g, b, a = color_abgr_split(c)
+                if (a > 0) then ModImageSetPixel(id, x, y, c) end
+            end
+        end
+    end
+    splice("data/biome_impl/temple/altar_left.png",
+        "mods/wand_workshop/files/biomes/temple/altar_left.png", 314, 86)
+    splice("data/biome_impl/temple/altar_left_visual.png",
+        "mods/wand_workshop/files/biomes/temple/altar_left_visual.png", 314, 86)
+end
+
 dofile_once("mods/wand_workshop/files/biomes/append_biomes.lua")
 
 local emit_last_key = "wand_workshop.emit_last"
-function OnWorldInitialized() -- This is called once the game world is initialized. Doesn't ensure any world chunks actually exist. Use OnPlayerSpawned to ensure the chunks around player have been loaded or created.	
-    -- Some global stuff I do for debugs to make my brain hurt less
-    GlobalsSetValue(emit_last_key, "-60") -- this is for particles for showing stuff works
+function OnWorldInitialized()          -- This is called once the game world is initialized. Doesn't ensure any world chunks actually exist. Use OnPlayerSpawned to ensure the chunks around player have been loaded or created.	
+	-- Some global stuff I do for debugs to make my brain hurt less
+	GlobalsSetValue(emit_last_key, "-60") -- this is for particles for showing stuff works
 end
 
 --[[
@@ -33,4 +57,4 @@ end
 function OnWorldPostUpdate() -- This is called every time the game has finished updating the world
 	GamePrint( "Post-update hook " .. tostring(GameGetFrameNum()) )
 end
-]]--
+]] --
